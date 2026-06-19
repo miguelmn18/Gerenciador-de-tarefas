@@ -1,28 +1,58 @@
 import Tasks from "./components/Tasks";
 import AddTasks from "./components/AddTasks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {v4} from "uuid" ;
 
 function App (){
-  const [tasks, setTasks] = useState([{
-    id:1,
-    title: "Estudar Programação",
-    day: "15 de julho as 10:00hrs",
-    isCompleted: true
-  },
-  {
-    id:2,
-    title: "Estudar Geologia",
-    day: "20 de julho as 08:00hrs",
-    isCompleted: false
 
-}]);
+  const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem("tasks")) ||
+
+[]);
+
+useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}, [tasks]);
+function onTasksClick (tasksID){
+  const newTasks = tasks.map(tasks => {
+    if(tasks.id === tasksID){
+      return {... tasks, isCompleted : !tasks.isCompleted}
+    } else {
+      return tasks;
+    }
+    
+  });
+  setTasks(newTasks);
+}
+
+function onDeleteTasksClick (tasksId){
+  const newTasks = tasks.filter(tasks => tasks.id != tasksId);
+  setTasks(newTasks );
+
+}
+
+function onAddTasksSubmit (title, description) {
+  const newTasks = {
+    id : v4(),
+    title : title,
+    description: description,
+    isCompleted : false,
+
+  };
+  setTasks([...tasks, newTasks]);
+
+
+}
   return ( 
   
     <div className="w-screen h-screen bg-slate-500 flex justify-center p-6"> {/* cobre toda altura e largura */}
-      <div className="w-[500px]">
+      <div className="w-[500px] space-y-4">
         <h1 class="text-3xl text-slate-100 font-bold text-center">Gerenciador de Tarefas</h1>
 
-        <Tasks tasks = {tasks}></Tasks>
+        <AddTasks onAddTasksSubmit = {onAddTasksSubmit}></AddTasks>
+        <Tasks tasks = {tasks}
+        onTasksClick = {onTasksClick}
+        onDeleteTasksClick = {onDeleteTasksClick}></Tasks>
+        
       </div>
     </div>
   )
